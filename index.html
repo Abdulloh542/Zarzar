@@ -1,340 +1,431 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Qo'l Boshqaruvi</title>
-
-    <!-- Favikon -->
-    <link rel="icon" type="image/png" href="favicon.png">
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Minimal Portfolio</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    />
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', sans-serif; }
-        
-        /* Kamera orqa foni (To'liq ekran) */
-        #video-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            transform: scaleX(-1); /* Oyna effekti */
-            opacity: 0.4; /* Zarrachalar yaxshiroq ko'rinishi uchun xira fon */
-        }
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        :root {
+            color-scheme: light dark;
+            --bg: #0f1115;
+            --panel: #151823;
+            --muted: #a7adbb;
+            --text: #f4f5f7;
+            --accent: #a2f5bf;
+            --accent-strong: #4af2a1;
+            --line: rgba(255, 255, 255, 0.08);
+            --shadow: 0 24px 80px rgba(15, 17, 21, 0.45);
         }
 
-        /* 3D Sahna */
-        #canvas-container { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            z-index: 1; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        
-        /* UI Matnlari */
-        #ui-layer {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-            color: white;
-            pointer-events: none;
-            text-shadow: 0px 0px 5px rgba(0,0,0,0.8);
-        }
-        h1 { margin: 0; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 2px; color: #00d2ff; }
-        p { font-size: 1.1rem; color: #fff; max-width: 400px; line-height: 1.5; }
-        .instruction { font-weight: bold; color: #ffeb3b; }
 
-        /* Yuklash ekrani */
-        #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 20;
+        body {
+            min-height: 100vh;
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top, rgba(74, 242, 161, 0.12), transparent 45%),
+                var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        header {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            color: white;
+            margin-bottom: 64px;
         }
-        #start-btn {
-            padding: 15px 40px;
-            background: #00d2ff;
-            border: none;
-            border-radius: 30px;
-            color: #000;
-            font-weight: bold;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-            pointer-events: auto;
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-size: 0.85rem;
         }
-        #start-btn:hover {
-            transform: scale(1.05);
-            background: #ffffff;
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #4af2a1, #8ab4ff);
+            display: grid;
+            place-items: center;
+            color: #091016;
+            font-weight: 700;
         }
-        #loading-text {
+
+        nav {
+            display: flex;
+            gap: 28px;
+            font-size: 0.95rem;
+        }
+
+        .pill {
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.02);
+            transition: border 0.2s ease, background 0.2s ease;
+        }
+
+        .pill:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .headline {
+            font-size: clamp(2.4rem, 4vw, 3.5rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .accent {
+            color: var(--accent);
+        }
+
+        .lead {
             margin-top: 20px;
-            font-size: 1rem;
-            color: #888;
-        }
-        .hidden { display: none !important; }
-    </style>
-
-    <!-- Kutubxonalar -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-</head>
-<body>
-
-    <div id="overlay">
-        <button id="start-btn">KAMERANI YOQISH VA BOSHLASH</button>
-        <div id="loading-text">Foydalanuvchi kutilmoqda...</div>
-    </div>
-
-    <div id="ui-layer">
-        <h1>Zarrachalar Sehrgari</h1>
-        <p>
-            <span class="instruction">Musht qiling:</span> Zarrachalar qo'lga yig'iladi.<br>
-            <span class="instruction">Qo'lni oching:</span> Zarrachalar tarqaladi.<br>
-            Qo'lingizni harakatlantirib ularni boshqaring.
-        </p>
-    </div>
-
-    <div id="video-container">
-        <video id="input-video"></video>
-    </div>
-
-    <div id="canvas-container"></div>
-
-<script>
-    // --- SOZLAMALAR ---
-    const PARTICLE_COUNT = 6000;
-    const REPULSION_RADIUS = 60; 
-    const GATHER_SPEED = 0.08;   
-    
-    let scene, camera, renderer;
-    let particles, positions, originalPositions;
-    let handMesh; 
-    let handPosition = new THREE.Vector3(9999, 9999, 9999);
-    let isHandDetected = false;
-    let isFist = false; 
-    let clock = new THREE.Clock();
-
-    const videoElement = document.getElementById('input-video');
-    const startBtn = document.getElementById('start-btn');
-    const loadingText = document.getElementById('loading-text');
-    const overlay = document.getElementById('overlay');
-
-    startBtn.addEventListener('click', async () => {
-        startBtn.disabled = true;
-        startBtn.innerText = "AI YUKLANMOQDA...";
-        loadingText.innerText = "MediaPipe va WebGL ishga tushirilmoqda...";
-        
-        try {
-            await initThreeJS();
-            await initMediaPipe();
-            overlay.classList.add('hidden');
-        } catch (e) {
-            console.error(e);
-            loadingText.innerText = "Xatolik: " + e.message;
-            startBtn.disabled = false;
-        }
-    });
-
-    function initThreeJS() {
-        const container = document.getElementById('canvas-container');
-        scene = new THREE.Scene();
-        scene.background = null; 
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 120;
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        container.appendChild(renderer.domElement);
-
-        const geometry = new THREE.BufferGeometry();
-        positions = new Float32Array(PARTICLE_COUNT * 3);
-        originalPositions = new Float32Array(PARTICLE_COUNT * 3);
-        const colors = new Float32Array(PARTICLE_COUNT * 3);
-        const color = new THREE.Color();
-
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-            const x = (Math.random() - 0.5) * 300;
-            const y = (Math.random() - 0.5) * 200;
-            const z = (Math.random() - 0.5) * 100;
-
-            positions[i * 3] = x;
-            positions[i * 3 + 1] = y;
-            positions[i * 3 + 2] = z;
-
-            originalPositions[i * 3] = x;
-            originalPositions[i * 3 + 1] = y;
-            originalPositions[i * 3 + 2] = z;
-
-            const vx = (x / 300) + 0.5;
-            color.setHSL(0.6, 0.9, 0.5 + vx * 0.4);
-            colors[i * 3] = color.r;
-            colors[i * 3 + 1] = color.g;
-            colors[i * 3 + 2] = color.b;
+            max-width: 540px;
+            color: var(--muted);
         }
 
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-        const material = new THREE.PointsMaterial({
-            size: 1.5,
-            vertexColors: true,
-            blending: THREE.AdditiveBlending,
-            depthTest: false,
-            transparent: true,
-            opacity: 0.9
-        });
-
-        particles = new THREE.Points(geometry, material);
-        scene.add(particles);
-
-        const handGeo = new THREE.SphereGeometry(3, 16, 16);
-        const handMat = new THREE.MeshBasicMaterial({ color: 0xffeb3b, wireframe: true, transparent: true, opacity: 0.5 });
-        handMesh = new THREE.Mesh(handGeo, handMat);
-        scene.add(handMesh);
-
-        window.addEventListener('resize', onWindowResize, false);
-        animate();
-    }
-
-    async function initMediaPipe() {
-        const hands = new Hands({locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-        }});
-
-        hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.6,
-            minTrackingConfidence: 0.6
-        });
-
-        hands.onResults(onHandsResults);
-
-        const cameraUtils = new Camera(videoElement, {
-            onFrame: async () => {
-                await hands.send({image: videoElement});
-            },
-            width: 1280,
-            height: 720
-        });
-
-        await cameraUtils.start();
-    }
-
-    function onHandsResults(results) {
-        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            isHandDetected = true;
-            const landmarks = results.multiHandLandmarks[0];
-            const indexFinger = landmarks[9];
-            const targetX = (0.5 - indexFinger.x) * 300; 
-            const targetY = (0.5 - indexFinger.y) * 200; 
-            const targetZ = 0; 
-            handPosition.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.3);
-            handMesh.position.copy(handPosition);
-            handMesh.visible = true;
-
-            const wrist = landmarks[0];
-            const tips = [landmarks[8], landmarks[12], landmarks[16], landmarks[20]];
-            let avgDist = 0;
-            tips.forEach(tip => {
-                const d = Math.sqrt(Math.pow(tip.x - wrist.x, 2) + Math.pow(tip.y - wrist.y, 2));
-                avgDist += d;
-            });
-            avgDist /= 4;
-            isFist = avgDist < 0.2;
-            handMesh.material.color.setHex(isFist ? 0xff0044 : 0xffeb3b);
-
-        } else {
-            isHandDetected = false;
-            handMesh.visible = false;
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 32px;
         }
-    }
 
-    function animate() {
-        requestAnimationFrame(animate);
-        const time = clock.getElapsedTime();
-        const p = particles.geometry.attributes.position.array;
+        .button {
+            padding: 12px 22px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background: var(--accent-strong);
+            color: #08140f;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 18px 40px rgba(74, 242, 161, 0.25);
+        }
 
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-            const ix = i * 3;
-            const iy = i * 3 + 1;
-            const iz = i * 3 + 2;
-            let px = p[ix];
-            let py = p[iy];
-            let pz = p[iz];
-            const homeX = originalPositions[ix];
-            const homeY = originalPositions[iy] + Math.sin(time * 0.5 + ix) * 5;
-            const homeZ = originalPositions[iz];
+        .button.secondary {
+            background: transparent;
+            border-color: var(--line);
+            color: var(--text);
+            box-shadow: none;
+        }
 
-            if (isHandDetected) {
-                const dx = handPosition.x - px;
-                const dy = handPosition.y - py;
-                const dz = handPosition.z - pz;
-                const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        .button:hover {
+            transform: translateY(-2px);
+        }
 
-                if (isFist) {
-                    px += dx * GATHER_SPEED;
-                    py += dy * GATHER_SPEED;
-                    pz += dz * GATHER_SPEED;
-                    px += (Math.random() - 0.5) * 1.5;
-                    py += (Math.random() - 0.5) * 1.5;
-                    pz += (Math.random() - 0.5) * 1.5;
-                } else {
-                    if (dist < REPULSION_RADIUS) {
-                        const force = (REPULSION_RADIUS - dist) / REPULSION_RADIUS;
-                        const pushX = (dx / dist) * -1;
-                        const pushY = (dy / dist) * -1;
-                        const pushZ = (dz / dist) * -1;
-                        px += pushX * force * 15;
-                        py += pushY * force * 15;
-                        pz += pushZ * force * 15;
-                    } else {
-                        px += (homeX - px) * 0.05;
-                        py += (homeY - py) * 0.05;
-                        pz += (homeZ - pz) * 0.05;
-                    }
-                }
-            } else {
-                px += (homeX - px) * 0.02;
-                py += (homeY - py) * 0.02;
-                pz += (homeZ - pz) * 0.02;
+        .hero-card {
+            background: var(--panel);
+            border-radius: 24px;
+            padding: 28px;
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+
+        .hero-card ul {
+            list-style: none;
+            display: grid;
+            gap: 12px;
+            color: var(--muted);
+        }
+
+        .section {
+            margin-bottom: 72px;
+        }
+
+        .section h2 {
+            font-size: 1.6rem;
+            margin-bottom: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            padding: 22px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .card span {
+            display: block;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .contact {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            align-items: center;
+        }
+
+        .contact-card {
+            padding: 24px;
+            border-radius: 20px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+        }
+
+        footer {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--line);
+            padding-top: 24px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .stat {
+            padding: 14px 18px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--line);
+            min-width: 120px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 1.1rem;
+        }
+
+        .stat span {
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        @media (max-width: 720px) {
+            nav {
+                display: none;
             }
 
-            p[ix] = px;
-            p[iy] = py;
-            p[iz] = pz;
+            header {
+                margin-bottom: 40px;
+            }
         }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header>
+            <div class="brand">
+                <div class="logo">ZM</div>
+                <span>Zarzar Studio</span>
+            </div>
+            <nav>
+                <a class="pill" href="#about">About</a>
+                <a class="pill" href="#projects">Projects</a>
+                <a class="pill" href="#services">Services</a>
+                <a class="pill" href="#contact">Contact</a>
+            </nav>
+        </header>
 
-        particles.geometry.attributes.position.needsUpdate = true;
-        if (!isFist) particles.rotation.y = time * 0.05;
-        renderer.render(scene, camera);
-    }
+        <section class="hero">
+            <div>
+                <p class="pill" style="display:inline-flex; width: fit-content;">Available for select projects</p>
+                <h1 class="headline">
+                    Full personal <span class="accent">modern portfolio</span> for a minimalist creator.
+                </h1>
+                <p class="lead">
+                    I design and build sleek digital experiences for brands, founders, and teams who care about the details.
+                    From product strategy to motion-rich interfaces, I ship calm, confident, and premium web experiences.
+                </p>
+                <div class="hero-actions">
+                    <a class="button" href="#contact">Let’s collaborate</a>
+                    <a class="button secondary" href="#projects">View work</a>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <strong>7+</strong>
+                        <span>Years craft</span>
+                    </div>
+                    <div class="stat">
+                        <strong>42</strong>
+                        <span>Projects</span>
+                    </div>
+                    <div class="stat">
+                        <strong>98%</strong>
+                        <span>Client love</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-card">
+                <h3>Now focused on</h3>
+                <ul>
+                    <li>→ Minimal, premium brand systems</li>
+                    <li>→ Design-to-code implementation</li>
+                    <li>→ Webflow + React build pipelines</li>
+                    <li>→ Launch-ready handoff + training</li>
+                </ul>
+            </div>
+        </section>
 
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-</script>
+        <section id="about" class="section">
+            <h2>About</h2>
+            <div class="grid">
+                <div class="card">
+                    <span>Philosophy</span>
+                    <h3>Less, but intentional</h3>
+                    <p>
+                        Every pixel earns its place. I blend storytelling with function so your audience stays curious and focused.
+                    </p>
+                </div>
+                <div class="card">
+                    <span>Toolbox</span>
+                    <h3>Design + Code</h3>
+                    <p>
+                        Figma, Framer, Webflow, React, and Three.js are my daily stack for crafting modern experiences.
+                    </p>
+                </div>
+                <div class="card">
+                    <span>Clients</span>
+                    <h3>Global collaborations</h3>
+                    <p>
+                        Startups, agencies, and creative studios around the world trust me to ship premium interfaces on time.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="section">
+            <h2>Selected Projects</h2>
+            <div class="grid">
+                <div class="card">
+                    <span>Product</span>
+                    <h3>Nova Fintech</h3>
+                    <p>Redesigned a banking experience with crisp dashboards and a streamlined onboarding flow.</p>
+                </div>
+                <div class="card">
+                    <span>Studio</span>
+                    <h3>Linea Architects</h3>
+                    <p>Crafted a portfolio showcase that balances white space with bold editorial typography.</p>
+                </div>
+                <div class="card">
+                    <span>Commerce</span>
+                    <h3>Atelier Maison</h3>
+                    <p>Built a luxury ecommerce concept with elegant microinteractions and storytelling.</p>
+                </div>
+                <div class="card">
+                    <span>Experience</span>
+                    <h3>Signal Labs</h3>
+                    <p>Developed a landing system for SaaS launches with modular sections and analytics-ready layouts.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="services" class="section">
+            <h2>Services</h2>
+            <div class="grid">
+                <div class="card">
+                    <span>01</span>
+                    <h3>Brand + Strategy</h3>
+                    <p>Positioning, messaging, and visual identity systems that align with your mission.</p>
+                </div>
+                <div class="card">
+                    <span>02</span>
+                    <h3>UI/UX Design</h3>
+                    <p>Responsive, accessibility-first interfaces with a premium, minimal aesthetic.</p>
+                </div>
+                <div class="card">
+                    <span>03</span>
+                    <h3>Development</h3>
+                    <p>High-performance builds with clean code, modern tooling, and smooth interactions.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section contact">
+            <div>
+                <h2>Let’s make something beautiful</h2>
+                <p class="lead">
+                    Ready to bring your next product to life? Share a few details and I’ll reply within 24 hours.
+                </p>
+            </div>
+            <div class="contact-card">
+                <p><strong>Email</strong><br />hello@zarzar.studio</p>
+                <p style="margin-top: 16px;"><strong>Location</strong><br />Tashkent · Remote worldwide</p>
+                <p style="margin-top: 16px;"><strong>Availability</strong><br />Booking May–July</p>
+                <div class="hero-actions" style="margin-top: 20px;">
+                    <a class="button" href="mailto:hello@zarzar.studio">Send email</a>
+                    <a class="button secondary" href="#projects">See case studies</a>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <span>© 2025 Zarzar Studio. All rights reserved.</span>
+            <span>Minimalist digital portfolio template.</span>
+        </footer>
+    </div>
 </body>
 </html>
